@@ -9,19 +9,50 @@
 html, body { height:100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background:#212121; color:#ececec; }
 #app { display:flex; flex-direction:column; height:100vh; }
 
-#dev-bar { flex-shrink:0; background:#1a1a2e; padding:6px 16px; display:flex; align-items:center; gap:10px; font-size:11px; color:#aaa; border-bottom:1px solid #333; flex-wrap:wrap; }
-#dev-bar button { color:#fff; border:1px solid #444; padding:3px 8px; border-radius:4px; font-size:11px; cursor:pointer; }
-.btn-next { background:#c0392b; }
-.btn-full { background:#555; }
-.badge { background:#27ae60; color:#fff; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:700; }
-
 .screen { display:none; flex:1; flex-direction:column; align-items:center; justify-content:center; padding:40px 24px; text-align:center; overflow-y:auto; }
 .screen.active { display:flex; }
 .screen h1 { font-size:22px; font-weight:700; margin-bottom:12px; }
-.screen p { font-size:14px; color:#aaa; line-height:1.7; max-width:480px; }
-.btn-main { margin-top:24px; background:linear-gradient(135deg,#a855f7,#6366f1); color:#fff; border:none; padding:12px 32px; border-radius:10px; font-size:15px; cursor:pointer; font-weight:600; text-decoration:none; display:inline-block; }
+.screen p { font-size:14px; color:#aaa; line-height:1.7; max-width:520px; }
+.btn-main { margin-top:18px; background:linear-gradient(135deg,#a855f7,#6366f1); color:#fff; border:none; padding:12px 32px; border-radius:10px; font-size:15px; cursor:pointer; font-weight:600; text-decoration:none; display:inline-block; }
 .btn-main:hover { opacity:.9; }
 .logo-icon { width:56px; height:56px; background:linear-gradient(135deg,#a855f7,#6366f1); border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:26px; margin-bottom:20px; }
+
+.form-wrap { width:100%; max-width:520px; margin-top:18px; text-align:left; background:#1f1f1f; border:1px solid #2b2b2b; border-radius:12px; padding:14px; }
+.form-row { margin-top:10px; }
+.form-row label { display:block; font-size:12px; color:#bdbdbd; margin-bottom:6px; }
+.form-row input, .form-row select {
+  width:100%;
+  padding:10px 12px;
+  border-radius:10px;
+  border:1px solid #333;
+  background:#2a2a2a;
+  color:#eee;
+  font-size:14px;
+}
+.form-actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
+.btn-secondary {
+  background:#2a2a2a;
+  border:1px solid #444;
+  color:#ddd;
+  padding:10px 14px;
+  border-radius:10px;
+  font-size:13px;
+  cursor:pointer;
+}
+.btn-secondary:hover { background:#333; border-color:#a855f7; color:#fff; }
+.btn-danger {
+  background:#3a1f1f;
+  border:1px solid #5a2a2a;
+  color:#ffd6d6;
+  padding:10px 14px;
+  border-radius:10px;
+  font-size:13px;
+  cursor:pointer;
+}
+.btn-danger:hover { background:#4a2424; border-color:#ff6b6b; }
+
+.small-note { font-size:12px; color:#777; margin-top:10px; line-height:1.6; }
+.err { color:#ff8a8a; font-size:12px; margin-top:10px; display:none; }
 
 #screen-chat { display:none; flex-direction:column; padding:0; align-items:stretch; justify-content:flex-start; }
 #chat-header { flex-shrink:0; padding:12px 20px; border-bottom:1px solid #2a2a2a; display:flex; align-items:center; gap:10px; }
@@ -52,30 +83,69 @@ html, body { height:100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe
 .typing span:nth-child(2){animation-delay:.2s}
 .typing span:nth-child(3){animation-delay:.4s}
 @keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
+
+.data-wrap { width:100%; max-width:860px; text-align:left; }
+.data-top { display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.data-top h1 { margin:0; }
+.data-actions { display:flex; gap:10px; flex-wrap:wrap; }
+.session-card {
+  background:#1f1f1f;
+  border:1px solid #2b2b2b;
+  border-radius:12px;
+  padding:14px;
+  margin-top:12px;
+}
+.session-meta { display:flex; gap:12px; flex-wrap:wrap; color:#bbb; font-size:12px; margin-top:6px; }
+.kv { background:#2a2a2a; border:1px solid #333; padding:4px 10px; border-radius:999px; }
+.pre {
+  background:#121212;
+  border:1px solid #2b2b2b;
+  border-radius:10px;
+  padding:12px;
+  margin-top:10px;
+  white-space:pre-wrap;
+  font-size:12px;
+  color:#ddd;
+  line-height:1.6;
+}
+.hr { height:1px; background:#2b2b2b; margin-top:10px; }
 </style>
 </head>
 <body>
 <div id="app">
 
-  <!-- DEV BAR -->
-  <div id="dev-bar">
-    🔬 Researcher Panel —
-    Participant: <strong id="partdisplay">–</strong>
-    Condition: <strong id="cdisplay">–</strong>
-    <button class="btn-next" onclick="devReset()">↺ Next Participant</button>
-    <button class="btn-full" onclick="fullReset()">⟳ Full Reset</button>
-    <span class="badge">PROTOTYPE v5</span>
-  </div>
-
-  <!-- WELCOME -->
   <div id="screen-welcome" class="screen active">
     <div class="logo-icon">✦</div>
     <h1>Nova AI</h1>
     <p>You're going to Turkey for Spring Break. This chatbot is going to help you with the travel planning.</p>
-    <button class="btn-main" onclick="startChat()">Start →</button>
+
+    <div class="form-wrap">
+      <div class="form-row">
+        <label for="participantId">Participant ID or name</label>
+        <input id="participantId" type="text" placeholder="Type participant ID or name">
+      </div>
+
+      <div class="form-row">
+        <label for="conditionSelect">Condition</label>
+        <select id="conditionSelect" disabled>
+          <option value="A">A (Undisclosed)</option>
+          <option value="B">B (Disclosed)</option>
+        </select>
+        <div class="small-note">Condition selection is locked. Use unlock to change it.</div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn-secondary" id="btnUnlock" onclick="toggleResearcherControls()">Unlock researcher controls</button>
+        <button class="btn-secondary" id="btnViewData" onclick="openDataScreen()" style="display:none;">View recorded responses</button>
+      </div>
+
+      <div id="welcomeErr" class="err">Please enter a participant ID or name.</div>
+
+      <button class="btn-main" onclick="startChat()">Start →</button>
+      <div class="small-note">Sessions are stored in Firebase.</div>
+    </div>
   </div>
 
-  <!-- CHAT -->
   <div id="screen-chat">
     <div id="chat-header">
       <div class="hlogo">✦</div>
@@ -86,142 +156,237 @@ html, body { height:100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe
     <div id="chat-footer"><div class="input-hint">Choose an option above to continue</div></div>
   </div>
 
-  <!-- THANK YOU -->
   <div id="screen-thankyou" class="screen">
-    <div style="max-width:480px;">
+    <div style="max-width:520px;">
       <div style="font-size:36px;margin-bottom:16px;">🙏</div>
       <h1>Thank You!</h1>
-      <p style="margin-top:12px;">You've completed the chat session. Please now take a moment to fill in a short survey about your experience.<br><br>
-      <strong style="color:#ccc;">Click the button below or follow the researcher's instructions.</strong></p>
-      <a href="#" class="btn-main">Take the Survey →</a>
+      <p style="margin-top:12px;">Thank you for taking part.</p>
+      <button class="btn-main" onclick="nextParticipant()">Next participant →</button>
     </div>
   </div>
 
-  <!-- DEBRIEF -->
-  <div id="screen-debrief" class="screen">
-    <div style="max-width:480px;">
-      <div style="font-size:36px;margin-bottom:16px;">🔬</div>
-      <h1>Debrief</h1>
-      <p style="margin-top:12px;">Thank you for participating. This was a research study examining how <strong style="color:#a855f7;">embedded advertising in AI responses</strong> affects user trust and behaviour.<br><br>
-      You were randomly assigned to one of two conditions: an undisclosed advertisement, or a clearly disclosed advertisement.<br><br>
-      Nova is a simulated AI — all responses were pre-scripted by the research team. Your responses help us understand the neuroscience of AI trust.<br><br>
-      <strong style="color:#ccc;">If you have any questions, please speak to the researcher.</strong></p>
+  <div id="screen-data" class="screen">
+    <div class="data-wrap">
+      <div class="data-top">
+        <div>
+          <div style="font-size:36px;margin-bottom:10px;">📋</div>
+          <h1>Recorded responses</h1>
+          <p style="margin-top:6px;">This list is loaded from Firebase.</p>
+        </div>
+        <div class="data-actions">
+          <button class="btn-secondary" onclick="exportAllCSV()">Export all as CSV</button>
+          <button class="btn-danger" onclick="backToWelcome()">Back</button>
+        </div>
+      </div>
+      <div id="dataList"></div>
     </div>
   </div>
 
 </div>
-<script>
-// ── CONDITION LABELS ────────────────────────────────────────────────────────
-// A = Undisclosed Ad, B = Disclosed Ad
-const CONDITION_LABELS = { A:'A (Undisclosed)', B:'B (Disclosed)' };
 
-// ── AD TEXT ─────────────────────────────────────────────────────────────────
-const AD_TEXT = {
-  A: "Great base. For accommodation, Booking.com tends to have solid options there — good range across budgets and free cancellation on most listings. Prices vary a lot by area, so staying central is usually worth the slight premium.\n\nWhat's your rough budget per night?",
-  B: "Great base. For accommodation, <span class='sponsored'>Sponsored</span> Booking.com has a solid range of options there — good variety across budgets and free cancellation on most listings. Prices vary by area, so staying central is usually worth the slight premium.\n\nWhat's your rough budget per night?"
+<script type="importmap">
+{
+  "imports": {
+    "firebase/app": "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js",
+    "firebase/analytics": "https://www.gstatic.com/firebasejs/10.12.5/firebase-analytics.js",
+    "firebase/firestore": "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js"
+  }
+}
+</script>
+
+<script type="module">
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics, isSupported as analyticsSupported } from "firebase/analytics";
+import { getFirestore, collection, doc, setDoc, getDocs, deleteDoc, query, orderBy } from "firebase/firestore";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAkvgRW6_5XzEXWaIoj2V2buw_eB1XwiL0",
+  authDomain: "nova-ai-a2fea.firebaseapp.com",
+  projectId: "nova-ai-a2fea",
+  storageBucket: "nova-ai-a2fea.firebasestorage.app",
+  messagingSenderId: "290227601464",
+  appId: "1:290227601464:web:bf3a8b70fba367344f26cd",
+  measurementId: "G-1LQ2MJZJ2T"
 };
 
-// ── SCRIPT ──────────────────────────────────────────────────────────────────
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+
+// Analytics can fail in some browsers. Keep it safe.
+let analytics = null;
+try {
+  if (await analyticsSupported()) analytics = getAnalytics(app);
+} catch (e) {
+  analytics = null;
+}
+
+const db = getFirestore(app);
+const SESSIONS_COLLECTION = "nova_sessions";
+
+const APP_PASSWORD = "1111";
+const DISENGAGE_STEPS = [3, 4];
+
+const AD_TEXT = {
+  A: "Great base. For accommodation, Booking.com tends to have solid options there. Good range across budgets and free cancellation on most listings. Prices vary a lot by area. Staying central is usually worth the slight premium.\n\nWhat's your rough budget per night?",
+  B: "Great base. For accommodation, <span class='sponsored'>Sponsored</span> Booking.com has a solid range of options there. Good variety across budgets and free cancellation on most listings. Prices vary by area. Staying central is usually worth the slight premium.\n\nWhat's your rough budget per night?"
+};
+
 const SCRIPT = [
-  // Step 1 — Engagement
   {
     ai: "Turkey is a great choice for Spring Break! To help you plan, what kind of trip are you looking for?",
     opts: [
-      "Culture and history — ruins, mosques, old cities",
-      "Food and nightlife — local cuisine, rooftop bars, markets",
-      "Beaches and relaxation — coast, sun, switching off"
+      "Culture and history. Ruins, mosques, old cities",
+      "Food and nightlife. Local cuisine, rooftop bars, markets",
+      "Beaches and relaxation. Coast, sun, switching off"
     ]
   },
-  // Step 2 — Engagement
   {
     ai: "Good choice. Turkey has a lot to offer on that front. Where are you thinking of basing yourself?",
     opts: [
-      "Istanbul — I want the full city experience",
-      "Cappadocia — the landscapes look incredible",
-      "Antalya or the coast — somewhere warm by the sea"
+      "Istanbul. I want the full city experience",
+      "Cappadocia. The landscapes look incredible",
+      "Antalya or the coast. Somewhere warm by the sea"
     ]
   },
-  // Step 3 — AD INSERTION POINT
   {
     ai: AD_TEXT,
     opts: [
-      "Budget — under £40 per night",
-      "Mid-range — £40 to £80 per night",
-      "Flexible — comfort over cost"
+      "Budget. Under £40 per night",
+      "Mid range. £40 to £80 per night",
+      "Flexible. Comfort over cost"
     ]
   },
-  // Step 4 — Contamination window
   {
-    ai: "That's a reasonable range for Turkey — you'll find good options at that budget. A few things worth knowing: booking a few weeks out makes a noticeable difference in price, and reading recent reviews is more reliable than star ratings for smaller properties.\n\nWhat else would you like help planning?",
+    ai: "That's a reasonable range for Turkey. You'll find good options at that budget. Booking a few weeks out makes a difference in price. Recent reviews are more reliable than star ratings for smaller properties.\n\nWhat else would you like help planning?",
     opts: [
-      "Getting around — flights, transport within Turkey",
-      "What to eat — local food recommendations",
-      "I think I have enough to go on, thanks"
+      "Getting around. Flights, transport within Turkey",
+      "What to eat. Local food recommendations",
+      "I think I have enough to go on. Thanks"
     ]
   },
-  // Step 5 — Contamination window
   {
-    ai: "Turkey is very well connected — domestic flights between Istanbul, Cappadocia, and Antalya are frequent and affordable, often under £30 one way. Intercity buses are comfortable and even cheaper if you have more time.\n\nFor food, the essentials: fresh simit in the morning, a proper döner for lunch, and mezze in the evening. Street food is generally safe and very good.\n\nAnything else before you start planning?",
+    ai: "Turkey is well connected. Domestic flights between Istanbul, Cappadocia, and Antalya are frequent and affordable. Often under £30 one way. Intercity buses are comfortable and cheaper if you have more time.\n\nFor food, the essentials. Fresh simit in the morning. A proper döner for lunch. Mezze in the evening. Street food is generally safe and very good.\n\nAnything else before you start planning?",
     opts: [
-      "Yes — what are the must-see things to do?",
+      "Yes. What are the must see things to do?",
       "How much should I budget for the whole trip?",
-      "No, that's everything — thanks Nova"
+      "No. That's everything. Thanks Nova"
     ]
   },
-  // Step 6 — Closure
   {
-    ai: "You're all set! Turkey is a great choice for Spring Break — it's affordable, easy to get around, and has something for every kind of traveller.\n\nHope you have an amazing trip. Safe travels! 🌙",
+    ai: "You're all set! Turkey is a great choice for Spring Break. It's affordable. It's easy to get around. It has something for every kind of traveller.\n\nHope you have an amazing trip. Safe travels! 🌙",
     opts: [
       "Thanks Nova!",
-      "Really helpful, appreciate it",
-      "Great, I'll start booking"
+      "Really helpful. Appreciate it",
+      "Great. I'll start booking"
     ]
   }
 ];
 
-// ── STATE ────────────────────────────────────────────────────────────────────
-let condition = '';
+let condition = "A";
 let step = 0;
-let participantNum = 0;
-let blockSequence = [];
 let sessionData = {};
+let researcherUnlocked = false;
 
-const DISENGAGE_STEPS = [3, 4];
-
-// ── BLOCK RANDOMISATION ──────────────────────────────────────────────────────
-function generateBlockSequence(total) {
-  const seq = [];
-  for (let i = 0; i < total / 2; i++) {
-    const block = ['A', 'B'];
-    if (Math.random() > 0.5) block.reverse();
-    seq.push(...block);
+function requirePassword(actionName) {
+  const entered = prompt(`Enter password to ${actionName}`);
+  if (entered === null) return false;
+  if (entered !== APP_PASSWORD) {
+    alert("Incorrect password.");
+    return false;
   }
-  return seq;
+  return true;
 }
 
-function assignCondition() {
-  if (blockSequence.length === 0) blockSequence = generateBlockSequence(40);
-  condition = blockSequence[participantNum] || 'A';
-  document.getElementById('cdisplay').textContent = CONDITION_LABELS[condition];
-  document.getElementById('partdisplay').textContent = `${participantNum + 1}`;
-}
-
-// ── SCREENS ──────────────────────────────────────────────────────────────────
 function showScreen(id) {
-  ['screen-welcome','screen-chat','screen-thankyou','screen-debrief'].forEach(s => {
+  const screens = ['screen-welcome','screen-chat','screen-thankyou','screen-data'];
+  screens.forEach(s => {
     const el = document.getElementById(s);
     el.style.display = 'none';
     el.classList.remove('active');
   });
   const t = document.getElementById(id);
-  if (id === 'screen-chat') { t.style.display = 'flex'; t.style.flexDirection = 'column'; }
-  else { t.style.display = 'flex'; t.classList.add('active'); }
+  if (id === 'screen-chat') {
+    t.style.display = 'flex';
+    t.style.flexDirection = 'column';
+  } else {
+    t.style.display = 'flex';
+    t.classList.add('active');
+  }
 }
 
-// ── CHAT ─────────────────────────────────────────────────────────────────────
+function backToWelcome() { showScreen('screen-welcome'); }
+function goToThankYou() { showScreen('screen-thankyou'); }
+
+async function addSessionToFirebase(session) {
+  const ref = doc(db, SESSIONS_COLLECTION, session.sessionKey);
+  await setDoc(ref, session, { merge: false });
+}
+
+async function deleteSessionFromFirebase(sessionKey) {
+  const ref = doc(db, SESSIONS_COLLECTION, sessionKey);
+  await deleteDoc(ref);
+}
+
+async function loadAllSessionsFirebase() {
+  const q = query(collection(db, SESSIONS_COLLECTION), orderBy("startTimeISO", "desc"));
+  const snap = await getDocs(q);
+  const out = [];
+  snap.forEach(d => out.push(d.data()));
+  return out;
+}
+
+function toggleResearcherControls() {
+  const btn = document.getElementById("btnUnlock");
+  const select = document.getElementById("conditionSelect");
+  const viewBtn = document.getElementById("btnViewData");
+
+  if (!researcherUnlocked) {
+    if (!requirePassword("unlock researcher controls")) return;
+    researcherUnlocked = true;
+    select.disabled = false;
+    viewBtn.style.display = "inline-block";
+    if (btn) btn.textContent = "Lock researcher controls";
+    alert("Researcher controls unlocked.");
+    return;
+  }
+
+  researcherUnlocked = false;
+  select.disabled = true;
+  viewBtn.style.display = "none";
+  if (btn) btn.textContent = "Unlock researcher controls";
+  alert("Researcher controls locked.");
+}
+
+async function openDataScreen() {
+  if (!requirePassword("view recorded responses")) return;
+  await renderDataList();
+  showScreen('screen-data');
+}
+
 function startChat() {
-  assignCondition();
-  sessionData = { participantNum: participantNum + 1, condition, startTime: new Date().toISOString(), responses: [], disengagementCount: 0, completed: false };
+  const pid = (document.getElementById("participantId").value || "").trim();
+  const err = document.getElementById("welcomeErr");
+
+  if (!pid) {
+    err.style.display = "block";
+    return;
+  }
+  err.style.display = "none";
+
+  condition = document.getElementById("conditionSelect").value || "A";
+
+  const now = new Date();
+  sessionData = {
+    sessionKey: `${now.getTime()}_${Math.random().toString(16).slice(2)}`,
+    participantId: pid,
+    condition: condition,
+    startTimeISO: now.toISOString(),
+    responses: [],
+    disengagementCount: 0,
+    completed: false
+  };
+
   document.getElementById('chat-body').innerHTML = '';
   step = 0;
   showScreen('screen-chat');
@@ -229,32 +394,76 @@ function startChat() {
 }
 
 function nextStep() {
-  if (step >= SCRIPT.length) { setTimeout(() => showScreen('screen-thankyou'), 800); return; }
+  if (step >= SCRIPT.length) {
+    sessionData.completed = true;
+    sessionData.endTimeISO = new Date().toISOString();
+
+    addSessionToFirebase(sessionData).catch(err => {
+      console.error("Firebase save failed:", err);
+      alert("Save failed. Please check Firebase rules or internet connection.");
+    });
+
+    setTimeout(() => {
+      showTyping();
+      setTimeout(() => {
+        removeTyping();
+        addAI("My pleasure. This chat is now complete. Please click continue to proceed.");
+        addEndContinueButton();
+      }, 900);
+    }, 250);
+
+    return;
+  }
+
   const s = SCRIPT[step];
+
   setTimeout(() => {
     showTyping();
     setTimeout(() => {
       removeTyping();
       const text = typeof s.ai === 'object' ? s.ai[condition] : s.ai;
       addAI(text);
-      if (s.opts) addOptions(s.opts, idx => {
-        const isDisengage = DISENGAGE_STEPS.includes(step) && idx === 2;
-        sessionData.responses.push({ step, optionIndex: idx, optionText: s.opts[idx], isDisengage });
-        if (isDisengage) sessionData.disengagementCount++;
-        addUser(s.opts[idx]);
-        step++;
-        nextStep();
-      });
+
+      if (s.opts) {
+        addOptions(s.opts, (idx, elapsedMs, shownAtISO) => {
+          const isDisengage = DISENGAGE_STEPS.includes(step) && idx === 2;
+
+          sessionData.responses.push({
+            step: step,
+            questionText: (typeof s.ai === 'object' ? stripHtml(s.ai[condition]) : s.ai),
+            optionIndex: idx + 1,
+            optionText: s.opts[idx],
+            isDisengage: isDisengage,
+            questionShownAtISO: shownAtISO || "",
+            answerAtISO: new Date().toISOString(),
+            timeTakenMs: Math.max(0, Math.round(Number(elapsedMs) || 0)),
+            timeTakenSec: (Math.max(0, Number(elapsedMs) || 0) / 1000)
+          });
+
+          if (isDisengage) sessionData.disengagementCount++;
+
+          addUser(s.opts[idx]);
+          step++;
+          nextStep();
+        });
+      }
     }, 1100);
   }, 300);
+}
+
+function stripHtml(text) {
+  const tmp = document.createElement("div");
+  tmp.innerHTML = text;
+  return tmp.textContent || tmp.innerText || "";
 }
 
 function addAI(text) {
   const cb = document.getElementById('chat-body');
   const w = document.createElement('div');
   w.className = 'msg-wrap';
-  w.innerHTML = `<div class="ai-wrap"><div class="ai-label"><div class="ai-dot"></div> Nova</div><div class="ai-text">${text.replace(/\n/g,'<br>')}</div></div>`;
-  cb.appendChild(w); cb.scrollTop = cb.scrollHeight;
+  w.innerHTML = `<div class="ai-wrap"><div class="ai-label"><div class="ai-dot"></div> Nova</div><div class="ai-text">${String(text).replace(/\n/g,'<br>')}</div></div>`;
+  cb.appendChild(w);
+  cb.scrollTop = cb.scrollHeight;
 }
 
 function addUser(text) {
@@ -262,51 +471,289 @@ function addUser(text) {
   const w = document.createElement('div');
   w.className = 'msg-wrap clearfix';
   w.innerHTML = `<div class="user-bubble">${text}</div>`;
-  cb.appendChild(w); cb.scrollTop = cb.scrollHeight;
+  cb.appendChild(w);
+  cb.scrollTop = cb.scrollHeight;
 }
 
 function addOptions(opts, cb) {
   const body = document.getElementById('chat-body');
   const w = document.createElement('div');
-  w.className = 'msg-wrap'; w.id = 'cur-opts';
-  w.innerHTML = `<div class="options-wrap">${opts.map((o,i) => `<button class="opt-btn" onclick="selectOpt(${i})"><span class="opt-num">${i+1}</span>${o}</button>`).join('')}</div>`;
-  w._cb = cb; body.appendChild(w); body.scrollTop = body.scrollHeight;
+  w.className = 'msg-wrap';
+  w.id = 'cur-opts';
+  w.innerHTML = `<div class="options-wrap">${
+    opts.map((o,i) => `<button class="opt-btn" onclick="selectOpt(${i})"><span class="opt-num">${i+1}</span>${o}</button>`).join('')
+  }</div>`;
+  w._cb = cb;
+  w._shownAtISO = new Date().toISOString();
+  w._startPerf = (window.performance && performance.now) ? performance.now() : Date.now();
+  body.appendChild(w);
+  body.scrollTop = body.scrollHeight;
 }
 
 function selectOpt(i) {
   const w = document.getElementById('cur-opts');
   if (!w) return;
   const cb = w._cb;
+
+  const end = (window.performance && performance.now) ? performance.now() : Date.now();
+  const start = (w._startPerf != null) ? w._startPerf : end;
+  const elapsedMs = Math.max(0, end - start);
+  const shownAtISO = w._shownAtISO || "";
+
   w.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
   w.id = 'used-opts';
-  if (cb) cb(i);
+  if (cb) cb(i, elapsedMs, shownAtISO);
 }
 
 function showTyping() {
   const cb = document.getElementById('chat-body');
   const w = document.createElement('div');
-  w.id = 'typing-w'; w.className = 'msg-wrap';
+  w.id = 'typing-w';
+  w.className = 'msg-wrap';
   w.innerHTML = `<div class="ai-wrap"><div class="ai-label"><div class="ai-dot"></div> Nova</div><div class="typing"><span></span><span></span><span></span></div></div>`;
-  cb.appendChild(w); cb.scrollTop = cb.scrollHeight;
+  cb.appendChild(w);
+  cb.scrollTop = cb.scrollHeight;
 }
 
-function removeTyping() { const t = document.getElementById('typing-w'); if (t) t.remove(); }
+function removeTyping() {
+  const t = document.getElementById('typing-w');
+  if (t) t.remove();
+}
 
-// ── RESEARCHER CONTROLS ───────────────────────────────────────────────────────
-function devReset() {
-  participantNum++;
-  condition = ''; step = 0; sessionData = {};
-  document.getElementById('cdisplay').textContent = '–';
-  document.getElementById('partdisplay').textContent = '–';
+function addEndContinueButton() {
+  const existing = document.getElementById('end-continue');
+  if (existing) return;
+
+  const body = document.getElementById('chat-body');
+  const w = document.createElement('div');
+  w.className = 'msg-wrap';
+  w.id = 'end-continue';
+  w.innerHTML = `<div class="options-wrap">
+    <button class="opt-btn" onclick="endContinueClick()"><span class="opt-num">1</span>Continue →</button>
+  </div>`;
+  body.appendChild(w);
+  body.scrollTop = body.scrollHeight;
+}
+
+function endContinueClick() {
+  const w = document.getElementById('end-continue');
+  if (!w) return;
+  w.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+  w.id = 'used-opts';
+  goToThankYou();
+}
+
+async function renderDataList() {
+  let list = [];
+  try {
+    list = await loadAllSessionsFirebase();
+  } catch (e) {
+    console.error("Firebase load failed:", e);
+    alert("Could not load data. Please check Firebase rules or internet connection.");
+    list = [];
+  }
+
+  const container = document.getElementById("dataList");
+  container.innerHTML = "";
+
+  if (!list || list.length === 0) {
+    container.innerHTML = `<div class="session-card"><p>No sessions recorded yet.</p></div>`;
+    return;
+  }
+
+  list.forEach(s => {
+    const card = document.createElement("div");
+    card.className = "session-card";
+
+    const start = s.startTimeISO ? new Date(s.startTimeISO).toLocaleString() : "Unknown";
+    const end = s.endTimeISO ? new Date(s.endTimeISO).toLocaleString() : "Unknown";
+    const pretty = buildPrettySessionText(s);
+
+    card.innerHTML = `
+      <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between;">
+        <div>
+          <div style="font-size:16px; font-weight:700;">${escapeHtml(s.participantId || "Unknown")}</div>
+          <div class="session-meta">
+            <div class="kv">Condition: ${escapeHtml(s.condition || "")}</div>
+            <div class="kv">Start: ${escapeHtml(start)}</div>
+            <div class="kv">End: ${escapeHtml(end)}</div>
+            <div class="kv">Disengage: ${Number(s.disengagementCount || 0)}</div>
+          </div>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button class="btn-danger" onclick="deleteSession('${escapeAttr(s.sessionKey)}')">Delete session</button>
+        </div>
+      </div>
+      <div class="hr"></div>
+      <div class="pre">${escapeHtml(pretty)}</div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function buildPrettySessionText(s) {
+  const lines = [];
+  lines.push(`Participant: ${s.participantId || ""}`);
+  lines.push(`Condition: ${s.condition || ""}`);
+  lines.push(`Start: ${s.startTimeISO || ""}`);
+  lines.push(`End: ${s.endTimeISO || ""}`);
+  lines.push(`Disengagement count: ${s.disengagementCount || 0}`);
+  lines.push("");
+  lines.push("Responses:");
+  (s.responses || []).forEach(r => {
+    lines.push(`Step ${r.step + 1}`);
+    lines.push(`Question: ${r.questionText || ""}`);
+    lines.push(`Answer: ${r.optionText || ""}`);
+    lines.push(`Option index: ${r.optionIndex}`);
+    lines.push(`Disengage: ${r.isDisengage ? "Yes" : "No"}`);
+    lines.push(`Question shown at: ${r.questionShownAtISO || ""}`);
+    lines.push(`Answer time: ${r.answerAtISO || ""}`);
+    lines.push(`Time taken (ms): ${r.timeTakenMs != null ? r.timeTakenMs : ""}`);
+    lines.push(`Time taken (sec): ${r.timeTakenSec != null ? r.timeTakenSec : ""}`);
+    lines.push("");
+  });
+  return lines.join("\n");
+}
+
+window.deleteSession = async function(sessionKey) {
+  if (!requirePassword("delete this session")) return;
+  if (!confirm("Delete this full session. This cannot be undone.")) return;
+
+  try {
+    await deleteSessionFromFirebase(sessionKey);
+    await renderDataList();
+  } catch (e) {
+    console.error("Firebase delete failed:", e);
+    alert("Delete failed. Please check Firebase rules or internet connection.");
+  }
+};
+
+window.exportAllCSV = async function() {
+  let list = [];
+  try {
+    list = await loadAllSessionsFirebase();
+  } catch (e) {
+    console.error("Firebase load failed:", e);
+    alert("Could not export. Please check Firebase rules or internet connection.");
+    return;
+  }
+
+  if (!list || list.length === 0) {
+    alert("No data to export.");
+    return;
+  }
+
+  const rows = [];
+  rows.push([
+    "sessionKey",
+    "participantId",
+    "condition",
+    "startTimeISO",
+    "endTimeISO",
+    "completed",
+    "disengagementCount",
+    "step",
+    "questionText",
+    "optionIndex",
+    "optionText",
+    "isDisengage",
+    "questionShownAtISO",
+    "answerAtISO",
+    "timeTakenMs",
+    "timeTakenSec"
+  ]);
+
+  list.forEach(s => {
+    const base = [
+      s.sessionKey || "",
+      s.participantId || "",
+      s.condition || "",
+      s.startTimeISO || "",
+      s.endTimeISO || "",
+      String(!!s.completed),
+      String(s.disengagementCount || 0)
+    ];
+
+    const responses = Array.isArray(s.responses) ? s.responses : [];
+    if (responses.length === 0) {
+      rows.push([...base, "", "", "", "", "", "", "", ""]);
+      return;
+    }
+
+    responses.forEach(r => {
+      rows.push([
+        ...base,
+        String((r.step ?? "")),
+        r.questionText || "",
+        String((r.optionIndex ?? "")),
+        r.optionText || "",
+        String(!!r.isDisengage),
+        r.questionShownAtISO || "",
+        r.answerAtISO || "",
+        String(r.timeTakenMs ?? ""),
+        String(r.timeTakenSec ?? "")
+      ]);
+    });
+  });
+
+  const csv = rows.map(r => r.map(csvCell).join(",")).join("\n");
+  const blob = new Blob([csv], { type:"text/csv;charset=utf-8" });
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "nova_responses.csv";
+  a.rel = "noopener";
+  document.body.appendChild(a);
+
+  try { a.click(); } catch (e) { window.open(url, "_blank"); }
+
+  a.remove();
+  setTimeout(() => { try { URL.revokeObjectURL(url); } catch(e) {} }, 2000);
+};
+
+window.nextParticipant = function() {
+  condition = "A";
+  step = 0;
+  sessionData = {};
+  document.getElementById("participantId").value = "";
+  document.getElementById("welcomeErr").style.display = "none";
+
+  const endCont = document.getElementById("end-continue");
+  if (endCont) endCont.remove();
+
+  if (!researcherUnlocked) {
+    document.getElementById("conditionSelect").value = "A";
+  }
+
   showScreen('screen-welcome');
+};
+
+function csvCell(v) {
+  const s = String(v ?? "");
+  if (s.includes('"') || s.includes(",") || s.includes("\n") || s.includes("\r")) {
+    return `"${s.replace(/"/g,'""')}"`;
+  }
+  return s;
 }
 
-function fullReset() {
-  participantNum = 0; blockSequence = []; condition = ''; step = 0; sessionData = {};
-  document.getElementById('cdisplay').textContent = '–';
-  document.getElementById('partdisplay').textContent = '–';
-  showScreen('screen-welcome');
+function escapeHtml(str) {
+  return String(str ?? "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
 }
+
+function escapeAttr(str) {
+  return String(str ?? "").replaceAll("'","\\'");
+}
+
+window.toggleResearcherControls = toggleResearcherControls;
+window.openDataScreen = openDataScreen;
+window.startChat = startChat;
+window.backToWelcome = backToWelcome;
 </script>
 </body>
 </html>
