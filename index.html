@@ -114,6 +114,7 @@ html, body { height:100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe
 <body>
 <div id="app">
 
+  <!-- WELCOME -->
   <div id="screen-welcome" class="screen active">
     <div class="logo-icon">✦</div>
     <h1>Nova AI</h1>
@@ -146,6 +147,7 @@ html, body { height:100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe
     </div>
   </div>
 
+  <!-- CHAT -->
   <div id="screen-chat">
     <div id="chat-header">
       <div class="hlogo">✦</div>
@@ -156,6 +158,7 @@ html, body { height:100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe
     <div id="chat-footer"><div class="input-hint">Choose an option above to continue</div></div>
   </div>
 
+  <!-- THANK YOU -->
   <div id="screen-thankyou" class="screen">
     <div style="max-width:520px;">
       <div style="font-size:36px;margin-bottom:16px;">🙏</div>
@@ -165,6 +168,7 @@ html, body { height:100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe
     </div>
   </div>
 
+  <!-- DATA -->
   <div id="screen-data" class="screen">
     <div class="data-wrap">
       <div class="data-top">
@@ -184,6 +188,7 @@ html, body { height:100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe
 
 </div>
 
+<!-- Import map lets you use the exact SDK import style you pasted -->
 <script type="importmap">
 {
   "imports": {
@@ -195,11 +200,17 @@ html, body { height:100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe
 </script>
 
 <script type="module">
+/* =========================
+   FIREBASE SDK (your style)
+========================= */
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAnalytics, isSupported as analyticsSupported } from "firebase/analytics";
-import { getFirestore, collection, doc, setDoc, getDocs, deleteDoc, query, orderBy } from "firebase/firestore";
+import {
+  getFirestore, collection, doc, setDoc, getDocs, deleteDoc, query, orderBy
+} from "firebase/firestore";
 
+// Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyAkvgRW6_5XzEXWaIoj2V2buw_eB1XwiL0",
   authDomain: "nova-ai-a2fea.firebaseapp.com",
@@ -213,7 +224,7 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Analytics can fail in some browsers. Keep it safe.
+// Analytics can fail on some browsers. We keep it safe.
 let analytics = null;
 try {
   if (await analyticsSupported()) analytics = getAnalytics(app);
@@ -224,8 +235,11 @@ try {
 const db = getFirestore(app);
 const SESSIONS_COLLECTION = "nova_sessions";
 
+/* =========================
+   APP SETTINGS
+========================= */
 const APP_PASSWORD = "1111";
-const DISENGAGE_STEPS = [3, 4];
+const CONDITION_LABELS = { A:"A (Undisclosed)", B:"B (Disclosed)" };
 
 const AD_TEXT = {
   A: "Great base. For accommodation, Booking.com tends to have solid options there. Good range across budgets and free cancellation on most listings. Prices vary a lot by area. Staying central is usually worth the slight premium.\n\nWhat's your rough budget per night?",
@@ -287,37 +301,11 @@ let condition = "A";
 let step = 0;
 let sessionData = {};
 let researcherUnlocked = false;
+const DISENGAGE_STEPS = [3, 4];
 
-function requirePassword(actionName) {
-  const entered = prompt(`Enter password to ${actionName}`);
-  if (entered === null) return false;
-  if (entered !== APP_PASSWORD) {
-    alert("Incorrect password.");
-    return false;
-  }
-  return true;
-}
-
-function showScreen(id) {
-  const screens = ['screen-welcome','screen-chat','screen-thankyou','screen-data'];
-  screens.forEach(s => {
-    const el = document.getElementById(s);
-    el.style.display = 'none';
-    el.classList.remove('active');
-  });
-  const t = document.getElementById(id);
-  if (id === 'screen-chat') {
-    t.style.display = 'flex';
-    t.style.flexDirection = 'column';
-  } else {
-    t.style.display = 'flex';
-    t.classList.add('active');
-  }
-}
-
-function backToWelcome() { showScreen('screen-welcome'); }
-function goToThankYou() { showScreen('screen-thankyou'); }
-
+/* =========================
+   FIRESTORE HELPERS
+========================= */
 async function addSessionToFirebase(session) {
   const ref = doc(db, SESSIONS_COLLECTION, session.sessionKey);
   await setDoc(ref, session, { merge: false });
@@ -336,6 +324,50 @@ async function loadAllSessionsFirebase() {
   return out;
 }
 
+/* =========================
+   PASSWORD
+========================= */
+function requirePassword(actionName) {
+  const entered = prompt(`Enter password to ${actionName}`);
+  if (entered === null) return false;
+  if (entered !== APP_PASSWORD) {
+    alert("Incorrect password.");
+    return false;
+  }
+  return true;
+}
+
+/* =========================
+   SCREENS
+========================= */
+function showScreen(id) {
+  const screens = ['screen-welcome','screen-chat','screen-thankyou','screen-data'];
+  screens.forEach(s => {
+    const el = document.getElementById(s);
+    el.style.display = 'none';
+    el.classList.remove('active');
+  });
+  const t = document.getElementById(id);
+  if (id === 'screen-chat') {
+    t.style.display = 'flex';
+    t.style.flexDirection = 'column';
+  } else {
+    t.style.display = 'flex';
+    t.classList.add('active');
+  }
+}
+
+function backToWelcome() {
+  showScreen('screen-welcome');
+}
+
+function goToThankYou() {
+  showScreen('screen-thankyou');
+}
+
+/* =========================
+   WELCOME CONTROLS
+========================= */
 function toggleResearcherControls() {
   const btn = document.getElementById("btnUnlock");
   const select = document.getElementById("conditionSelect");
@@ -364,6 +396,9 @@ async function openDataScreen() {
   showScreen('screen-data');
 }
 
+/* =========================
+   CHAT START
+========================= */
 function startChat() {
   const pid = (document.getElementById("participantId").value || "").trim();
   const err = document.getElementById("welcomeErr");
@@ -393,6 +428,9 @@ function startChat() {
   setTimeout(() => nextStep(), 500);
 }
 
+/* =========================
+   CHAT FLOW
+========================= */
 function nextStep() {
   if (step >= SCRIPT.length) {
     sessionData.completed = true;
@@ -457,6 +495,9 @@ function stripHtml(text) {
   return tmp.textContent || tmp.innerText || "";
 }
 
+/* =========================
+   CHAT UI
+========================= */
 function addAI(text) {
   const cb = document.getElementById('chat-body');
   const w = document.createElement('div');
@@ -543,6 +584,9 @@ function endContinueClick() {
   goToThankYou();
 }
 
+/* =========================
+   DATA SCREEN
+========================= */
 async function renderDataList() {
   let list = [];
   try {
@@ -712,10 +756,14 @@ window.exportAllCSV = async function() {
   setTimeout(() => { try { URL.revokeObjectURL(url); } catch(e) {} }, 2000);
 };
 
+/* =========================
+   NEXT PARTICIPANT
+========================= */
 window.nextParticipant = function() {
   condition = "A";
   step = 0;
   sessionData = {};
+
   document.getElementById("participantId").value = "";
   document.getElementById("welcomeErr").style.display = "none";
 
@@ -729,6 +777,9 @@ window.nextParticipant = function() {
   showScreen('screen-welcome');
 };
 
+/* =========================
+   CSV / HTML HELPERS
+========================= */
 function csvCell(v) {
   const s = String(v ?? "");
   if (s.includes('"') || s.includes(",") || s.includes("\n") || s.includes("\r")) {
@@ -750,10 +801,16 @@ function escapeAttr(str) {
   return String(str ?? "").replaceAll("'","\\'");
 }
 
+/* Expose functions for HTML onclick */
 window.toggleResearcherControls = toggleResearcherControls;
 window.openDataScreen = openDataScreen;
 window.startChat = startChat;
 window.backToWelcome = backToWelcome;
+window.selectOpt = selectOpt;
+window.endContinueClick = endContinueClick;
+
+/* Quick sanity log */
+console.log("Firebase initialised for project:", firebaseConfig.projectId);
 </script>
 </body>
 </html>
