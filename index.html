@@ -7,9 +7,9 @@
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
 html, body { height:100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background:#212121; color:#ececec; }
-#app { display:flex; flex-direction:column; height:100vh; }
+#app { display:flex; flex-direction:column; height:100vh; min-height:0; } /* FIX: Chrome scroll in flex layouts */
 
-.screen { display:none; flex:1; flex-direction:column; align-items:center; justify-content:center; padding:40px 24px; text-align:center; overflow-y:auto; }
+.screen { display:none; flex:1; min-height:0; flex-direction:column; align-items:center; justify-content:center; padding:40px 24px; text-align:center; overflow-y:auto; } /* FIX: min-height:0 */
 .screen.active { display:flex; }
 .screen h1 { font-size:22px; font-weight:700; margin-bottom:12px; }
 .screen p { font-size:14px; color:#aaa; line-height:1.7; max-width:520px; }
@@ -111,6 +111,7 @@ html, body { height:100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe
 .hr { height:1px; background:#2b2b2b; margin-top:10px; }
 
 /* Survey */
+#screen-survey { justify-content:flex-start; } /* Optional but improves scroll stability in Chrome */
 .survey-wrap { width:100%; max-width:720px; text-align:left; background:#1f1f1f; border:1px solid #2b2b2b; border-radius:12px; padding:16px; }
 .sq { margin-top:12px; padding-top:12px; border-top:1px solid #2b2b2b; }
 .sq:first-child { border-top:none; padding-top:0; margin-top:0; }
@@ -256,20 +257,19 @@ const AD_TEXT = {
   B: "Great base. For accommodation, <span class='sponsored'>Sponsored</span> Booking.com has a solid range of options there. Good variety across budgets and free cancellation on most listings. Prices vary by area. Staying central is usually worth the slight premium.\n\nWhat's your rough budget per night?"
 };
 
+/* UPDATED: Removed the two requested lines */
 const MUST_SEE_TEXT =
   "Here are some must-see highlights (depending on your base):\n\n" +
   "• Istanbul: Hagia Sophia, Blue Mosque, Grand Bazaar, a Bosphorus ferry at sunset.\n" +
   "• Cappadocia: sunrise viewpoints, a valley hike, Göreme open-air museum.\n" +
-  "• Antalya/coast: old town (Kaleiçi), a beach day, and a day trip to nearby ruins.\n\n" +
-  "If you tell me your base (Istanbul/Cappadocia/Antalya), I can rank the top 5 for your exact trip.";
+  "• Antalya/coast: old town (Kaleiçi), a beach day, and a day trip to nearby ruins.";
 
 const BUDGET_TEXT =
   "A simple rough budget for a Spring Break trip to Turkey (per person) could be:\n\n" +
   "• Accommodation: ~£35–£80 per night (varies by city and season)\n" +
   "• Food: ~£12–£25 per day (street food + one sit-down meal)\n" +
   "• Transport: domestic flight ~£25–£60 one way if needed, local transport low-cost\n" +
-  "• Activities: ~£10–£30 per day depending on tours/museums\n\n" +
-  "If you share how many days you’re going for, I can give a tighter total range.";
+  "• Activities: ~£10–£30 per day depending on tours/museums";
 
 const SCRIPT = [
   {
@@ -885,7 +885,6 @@ function buildPrettySessionText(s) {
   lines.push(`End time (UK): ${endT || ""}`);
   lines.push("");
 
-  // Keep ISO once for reference (optional but useful)
   lines.push(`Reference start ISO: ${s.startTimeISO || ""}`);
   lines.push("");
 
