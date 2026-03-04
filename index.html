@@ -322,7 +322,6 @@ const SCRIPT = [
   }
 ];
 
-/* Disengagement logic stays the same (you had step 3 & 4; here indices still 3 & 4) */
 const DISENGAGE_STEPS = [3, 4];
 
 const SURVEY = [
@@ -358,6 +357,14 @@ function formatUKTimeFromISO(iso) {
   } catch { return ""; }
 }
 
+function formatUKDateFromISO(iso) {
+  if (!iso) return "";
+  try {
+    const d = new Date(iso);
+    return d.toLocaleDateString("en-GB");
+  } catch { return ""; }
+}
+
 function pad2(n){ return String(n).padStart(2,"0"); }
 function formatStopwatch(ms) {
   const t = Math.max(0, Math.floor(ms || 0));
@@ -370,7 +377,7 @@ function formatStopwatch(ms) {
 function nowISO(){ return new Date().toISOString(); }
 
 /* =========================
-   SCROLL HELPER (auto-scroll reliability)
+   SCROLL HELPER
 ========================= */
 function scrollToBottom() {
   const cb = document.getElementById('chat-body');
@@ -483,13 +490,13 @@ function renderSurveyForm() {
   if (!wrap) return;
 
   wrap.innerHTML = "";
-  SURVEY.forEach((q, qi) => {
+  SURVEY.forEach((q) => {
     const div = document.createElement("div");
     div.className = "sq";
     div.innerHTML = `
       <h3>${escapeHtml(q.key)}. ${escapeHtml(q.text)}</h3>
       <div class="radio-row">
-        ${q.opts.map((opt, oi) => `
+        ${q.opts.map((opt) => `
           <label>
             <input type="radio" name="${escapeAttr(q.key)}" value="${escapeAttr(opt)}">
             <span>${escapeHtml(opt)}</span>
@@ -522,7 +529,6 @@ function startChat() {
     startTimeISO: now.toISOString(),
     startEpochMs: Date.now(),
 
-    // Duration fields (filled later)
     chatEndTimeISO: "",
     endTimeISO: "",
     chatDurationMs: null,
@@ -530,16 +536,12 @@ function startChat() {
     totalDurationMs: null,
     totalDurationSec: null,
 
-    // Survey
     surveyShownAtISO: "",
     surveySubmittedAtISO: "",
     surveyDurationMs: null,
     survey: {},
 
-    // Events (event markers)
     events: [],
-
-    // Responses
     responses: [],
     disengagementCount: 0,
     completed: false
@@ -567,7 +569,6 @@ function markEvent(name, extra = {}) {
   };
   sessionData.events = Array.isArray(sessionData.events) ? sessionData.events : [];
   sessionData.events.push(evt);
-  // also helpful for debugging / syncing
   console.log(`[EVENT] ${name}`, evt);
 }
 
@@ -576,7 +577,6 @@ function markEvent(name, extra = {}) {
 ========================= */
 function nextStep() {
   if (step >= SCRIPT.length) {
-    // Chat is complete (before survey)
     const chatEndISO = nowISO();
     sessionData.chatEndTimeISO = chatEndISO;
 
@@ -584,7 +584,6 @@ function nextStep() {
     sessionData.chatDurationMs = chatDurationMs;
     sessionData.chatDurationSec = chatDurationMs / 1000;
 
-    // Show final "continue to survey" prompt
     setTimeout(() => {
       showTyping();
       setTimeout(() => {
@@ -606,7 +605,6 @@ function nextStep() {
 
       const text = typeof s.ai === 'object' ? s.ai[condition] : s.ai;
 
-      // Promo event marker: SCRIPT index 2
       if (step === 2) {
         markEvent("PROMO_SHOWN", { condition });
       }
@@ -617,30 +615,24 @@ function nextStep() {
         addOptions(s.opts, async (idx, elapsedMs, shownAtISO, shownAtStopwatchMs) => {
           const isDisengage = DISENGAGE_STEPS.includes(step) && idx === 2;
 
-          // Stopwatch times
           const answerAtISO = nowISO();
           const answerStopwatchMs = Date.now() - (sessionData.startEpochMs || Date.now());
 
           sessionData.responses.push({
             step: step,
-
             questionText: (typeof s.ai === 'object' ? stripHtml(s.ai[condition]) : s.ai),
-
             optionIndex: idx + 1,
             optionText: s.opts[idx],
             isDisengage: isDisengage,
 
-            // Absolute times
             questionShownAtISO: shownAtISO || "",
             answerAtISO: answerAtISO,
 
-            // Stopwatch times (relative)
             questionStartStopwatchMs: shownAtStopwatchMs ?? null,
             questionStartStopwatchHHMMSS: formatStopwatch(shownAtStopwatchMs ?? 0),
             answerStopwatchMs: answerStopwatchMs,
             answerStopwatchHHMMSS: formatStopwatch(answerStopwatchMs),
 
-            // Duration
             timeTakenMs: Math.max(0, Math.round(Number(elapsedMs) || 0)),
             timeTakenSec: (Math.max(0, Number(elapsedMs) || 0) / 1000)
           });
@@ -650,13 +642,11 @@ function nextStep() {
           addUser(s.opts[idx]);
 
           // Minimal branching (Option 1) at step 4
-          // If they ask for must-see or whole trip budget, add extra AI response before closing step.
           if (step === 4 && (idx === 0 || idx === 1)) {
             showTyping();
             setTimeout(() => {
               removeTyping();
               addAI(idx === 0 ? MUST_SEE_TEXT : BUDGET_TEXT);
-              // then move to closing step
               step = 5;
               nextStep();
             }, 900);
@@ -774,10 +764,7 @@ function endContinueClick() {
   w.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
   w.id = 'used-opts';
 
-  // Survey shown time
   sessionData.surveyShownAtISO = nowISO();
-
-  // Render survey + go to survey screen
   renderSurveyForm();
   showScreen('screen-survey');
 }
@@ -811,7 +798,6 @@ async function submitSurvey() {
     sessionData.surveyDurationMs = Math.max(0, Date.now() - surveyShownEpochMs);
   }
 
-  // Total duration (start -> survey submit)
   sessionData.endTimeISO = sessionData.surveySubmittedAtISO;
   const totalMs = Date.now() - (sessionData.startEpochMs || Date.now());
   sessionData.totalDurationMs = totalMs;
@@ -819,13 +805,11 @@ async function submitSurvey() {
 
   sessionData.completed = true;
 
-  // Save to Firebase (single save at the true end)
   try {
     await addSessionToFirebase(sessionData);
   } catch (e) {
     console.error("Firebase save failed:", e);
     alert("Save failed. Please check Firebase rules or internet connection.");
-    // Still show thank you to avoid stuck participants
   }
 
   goToThankYou();
@@ -855,6 +839,7 @@ async function renderDataList() {
     const card = document.createElement("div");
     card.className = "session-card";
 
+    const sessionDateUK = formatUKDateFromISO(s.startTimeISO);
     const startUK = formatUKTimeFromISO(s.startTimeISO);
     const chatEndUK = formatUKTimeFromISO(s.chatEndTimeISO);
     const endUK = formatUKTimeFromISO(s.endTimeISO);
@@ -866,6 +851,7 @@ async function renderDataList() {
         <div>
           <div style="font-size:16px; font-weight:700;">${escapeHtml(s.participantId || "Unknown")}</div>
           <div class="session-meta">
+            <div class="kv">Date (UK): ${escapeHtml(sessionDateUK || "—")}</div>
             <div class="kv">Condition: ${escapeHtml(s.condition || "")}</div>
             <div class="kv">Start (UK): ${escapeHtml(startUK || "—")}</div>
             <div class="kv">Chat end (UK): ${escapeHtml(chatEndUK || "—")}</div>
@@ -886,25 +872,35 @@ async function renderDataList() {
 
 function buildPrettySessionText(s) {
   const lines = [];
+  const dateUK = formatUKDateFromISO(s.startTimeISO);
+  const startT = formatUKTimeFromISO(s.startTimeISO);
+  const chatEndT = formatUKTimeFromISO(s.chatEndTimeISO);
+  const endT = formatUKTimeFromISO(s.endTimeISO);
+
   lines.push(`Participant: ${s.participantId || ""}`);
   lines.push(`Condition: ${s.condition || ""}`);
+  lines.push(`Session date (UK): ${dateUK || ""}`);
+  lines.push(`Start time (UK): ${startT || ""}`);
+  lines.push(`Chat end time (UK): ${chatEndT || ""}`);
+  lines.push(`End time (UK): ${endT || ""}`);
+  lines.push("");
 
-  lines.push(`Start ISO: ${s.startTimeISO || ""}`);
-  lines.push(`Chat end ISO: ${s.chatEndTimeISO || ""}`);
-  lines.push(`End ISO: ${s.endTimeISO || ""}`);
+  // Keep ISO once for reference (optional but useful)
+  lines.push(`Reference start ISO: ${s.startTimeISO || ""}`);
+  lines.push("");
 
   lines.push(`Chat duration (ms): ${s.chatDurationMs ?? ""}`);
   lines.push(`Chat duration (sec): ${s.chatDurationSec ?? ""}`);
   lines.push(`Total duration (ms): ${s.totalDurationMs ?? ""}`);
   lines.push(`Total duration (sec): ${s.totalDurationSec ?? ""}`);
-
   lines.push(`Disengagement count: ${s.disengagementCount || 0}`);
   lines.push("");
 
   if (Array.isArray(s.events) && s.events.length) {
     lines.push("Events:");
     s.events.forEach(e => {
-      lines.push(`- ${e.name} @ ${e.atISO} | +${e.atStopwatchHHMMSS} (${e.atStopwatchMs} ms)`);
+      const t = formatUKTimeFromISO(e.atISO);
+      lines.push(`- ${e.name} @ ${t || ""} | +${e.atStopwatchHHMMSS} (${e.atStopwatchMs} ms)`);
     });
     lines.push("");
   }
@@ -917,8 +913,8 @@ function buildPrettySessionText(s) {
     lines.push(`Option index: ${r.optionIndex}`);
     lines.push(`Disengage: ${r.isDisengage ? "Yes" : "No"}`);
 
-    lines.push(`Question shown at (ISO): ${r.questionShownAtISO || ""}`);
-    lines.push(`Answer time (ISO): ${r.answerAtISO || ""}`);
+    lines.push(`Question shown (UK): ${formatUKTimeFromISO(r.questionShownAtISO) || ""}`);
+    lines.push(`Answer time (UK): ${formatUKTimeFromISO(r.answerAtISO) || ""}`);
 
     lines.push(`Question start (stopwatch): ${r.questionStartStopwatchHHMMSS || ""} (${r.questionStartStopwatchMs ?? ""} ms)`);
     lines.push(`Answer time (stopwatch): ${r.answerStopwatchHHMMSS || ""} (${r.answerStopwatchMs ?? ""} ms)`);
@@ -1084,7 +1080,6 @@ window.nextParticipant = function() {
     document.getElementById("conditionSelect").value = "A";
   }
 
-  // Clear survey selection UI (if any)
   const err = document.getElementById("surveyErr");
   if (err) err.style.display = "none";
   const surveyForm = document.getElementById("surveyForm");
@@ -1117,7 +1112,6 @@ function escapeAttr(str) {
   return String(str ?? "").replaceAll("'","\\'");
 }
 
-/* For querySelector name escaping */
 function cssEscape(s) {
   return String(s).replace(/([ #;?%&,.+*~\':"!^$[\]()=>|\/@])/g,'\\$1');
 }
